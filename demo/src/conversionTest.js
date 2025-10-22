@@ -15,7 +15,7 @@ export const conversionTest = () => {
     obj: { a: 1 },
     str: 'hello',
     bol: true,
-    date: new Date('2025-05-18T00:00:00Z'),
+    dt: new Date('2025-05-18T00:00:00Z'),
     err: new Error('boom'),
     map: new Map([['k', 1]]),
     num: 123,
@@ -84,7 +84,8 @@ export const conversionTest = () => {
           TO: toKey,
           INPUT: repr(value),
           OUTPUT: '',
-          ERROR: e instanceof Error ? e.message : String(e)
+          ERROR: e instanceof Error ? e.message : String(e),
+          CAUSE: e instanceof Error ? e.cause : ""
         });
       }
     }

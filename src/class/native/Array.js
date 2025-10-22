@@ -1,9 +1,7 @@
-import { anyToFn } from "@randajan/function-parser";
 import { isRunnable } from "../../defs/tools";
 import { _fn } from "./Function";
 import { numRnd } from "../../defs/crypt";
 import { Definition } from "../self/Definition";
-import { symToStr } from "../../defs/convert";
 import { rgxToStr } from "@randajan/regex-parser";
 
 export const _arr = Definition.createType("arr", {
@@ -20,13 +18,11 @@ export const _arr = Definition.createType("arr", {
     //dt,
     //err,
     //fn,
-    //map,
     //num,
     //obj,
-    rgx:(v, c)=>rgxToStr(v).split(c),
-    set:v=>[...v],
-    str:(v, c)=>v.split(c),
-    sym:(v, c)=>symToStr(v).split(c)
+    //rgx,
+    //set,
+    str:(v, {glue})=>v.split(glue)
 }).addTools({
     wrap: (any) =>Array.isArray(any) ? any : [any],
     swap: (arr, to, from) => {//swap position of two items in array

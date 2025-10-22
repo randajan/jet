@@ -1,5 +1,5 @@
 import { solids } from "../../defs/solid";
-import { getDefByInst, fail, factory, getTypeByInst, warn } from "../../defs/statics";
+import { getDefByInst, fail, factory, getTypeByInst, findConvPath } from "../../defs/statics";
 import { NoType } from "./NoType";
 
 export class Primitive extends NoType {
@@ -14,7 +14,7 @@ export class Primitive extends NoType {
     }
 
     create(...a) { return this.create(...a); }
-    rand(...a) { return this.rand(...a); }
+    rnd(...a) { return this.rnd(...a); }
 
     is(any) { //rebinded def
         const { self } = this.type; 
@@ -33,19 +33,24 @@ export class Primitive extends NoType {
         return is(any) && !isFilled(any);
     }
     
-    to(any, ...args) { //rebinded def
-        const { type:{ name, to }, parent} = this;
-        const def = getDefByInst(any, false);
-        if (def === this) { return any; }
-        warn(`converting to ${name}`, def.name);
-        const exe = def.to.get(name) || def.to.get("*") || def.to.get(parent?.name);
-        if (!exe) { fail(`unable convert to '${name}'`, def.name); }
-        try { return to(exe(any, ...args), ...args); }
-        catch(err) { fail(`unable convert to '${name}'`, def.name, err); }
+    to(any, opt={}) { //rebinded def
+        const dTo = this;
+        const dFrom = getDefByInst(any, false);
+        const convPath = findConvPath(dFrom, dTo);
+        if (typeof opt === "string") { opt = { glue:opt } }
+        try { return convPath.reduce((v, step) => step.fn(v, opt), any); }
+        catch(err) { fail(`conversion to '${dTo.name}' failed`, dFrom.name, err); }
+    }
+
+    toDbg(any) {
+        const dTo = this;
+        const dFrom = getDefByInst(any, false);
+        const convPath = findConvPath(dFrom, dTo);
+        return convPath.map(p=>({...p}));
     }
     
-    orNull(any, ...args) { //rebinded def
-        if (any != null) { return this.type.to(any, ...args); }
+    orNull(any, opt={}) { //rebinded def
+        if (any != null) { return this.type.to(any, opt); }
     }
 
     copy(any) { //rebinded def

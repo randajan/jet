@@ -1,5 +1,6 @@
 import { anyToFn } from "@randajan/function-parser";
 import { _obj } from "./Object";
+import { mapToObj, objToMap } from "../../defs/convert";
 
 
 export const _map = _obj.extend("map", {
@@ -12,19 +13,6 @@ export const _map = _obj.extend("map", {
     get:(x,k)=>x.get(k),
     set:(x,k,v)=>x.set(k,v),
     del:(x,k)=>x.del(k),
-    from:map=>Object.fromEntries(map.entries()),
-    to:obj=>new Map(Object.entries(obj))
-}).defineFrom({
-    //arr:,
-    //bol:,
-    //dt:,
-    //err:,
-    //fn:,
-    //map:,
-    //num:,
-    //obj:,
-    //rgx:,
-    //set:,
-    //str:,
-    //sym:
-});
+    toParent:mapToObj,
+    fromParent:objToMap
+})

@@ -18,7 +18,7 @@ export const _fn = Definition.createType("fn", {
     rgx:anyToFn,
     set:anyToFn,
     str:anyToFn,
-    sym:anyToFn
+    //sym
 }).addTools({
     benchmark: (fces, inputs, iterations = 100) => {
         const results = [];

@@ -13,7 +13,6 @@ export const strToNum = str => {
 
 export const symToStr = sym => String(sym).slice(7, -1);
 
-
 export const strToObj = str => {
     const obj = JSON.parse(str);
     if (typeof obj === "object") { return obj; }
@@ -29,12 +28,19 @@ export const errToObj = err => {
 }
 
 
-const boolPats = /^(0*|f|(no?t?)|off|false|undefined|null|NaN)$/i;
-export const strToBol = str => boolPats.test(str.trim());
 
+const boolPats = /^(0*|f|no?t?|none|off|false|undefined|null|NaN)$/i;
+export const strToBol = str => !boolPats.test(str.trim());
 
 export const numToDt = num => {
     const dt = new Date();
     dt.setTime(num);
     return dt;
 }
+
+
+export const mapToObj = map=>Object.fromEntries(map.entries());
+export const objToMap = obj=>new Map(Object.entries(obj));
+
+
+export const arrToStr = (arr, {glue})=>arr.join(glue ?? "");

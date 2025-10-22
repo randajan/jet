@@ -8,10 +8,10 @@ export const _rgx = _str.extend("rgx", {
     self: RegExp,
     create: RegExp,
     copy: x => RegExp(x.source),
-    from:rgx=>rgxToStr(rgx),
-    to:str=>strToRgx(str)
+    toParent:rgx=>rgxToStr(rgx),
+    fromParent:str=>strToRgx(str)
 }).defineFrom({
-    //arr:, //rgx: (arr, comma) => new RegExp(arr.join(comma ?? "|")), //TODO
+    arr: (arr, opt) => new RegExp(arr.join(opt.glue ?? "|"), opt.flags),
     //bol:,
     //dt:,
     //err:,

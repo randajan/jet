@@ -11,7 +11,7 @@ export const _num = Definition.createType("num", {
     create: Number,
     isFilled: x => !!x,
     copy: num => num,
-    rand: (min, max, sqr) => {
+    rnd: (min, max, sqr) => {
         let r = numRnd();
         sqr = sqr === true ? 2 : sqr === false ? -2 : _num.is(sqr) ? sqr : 0;
         if (sqr) { r = Math.pow(r, sqr < 0 ? -sqr : 1 / sqr); }
@@ -28,7 +28,7 @@ export const _num = Definition.createType("num", {
     //map,
     //rgx,
     //set,
-    sym:v => strToNum(symToStr(v))
+    //sym
 }).addTools({
     x: (num1, symbol, num2) => {
         const s = symbol, nums = _num.zoomIn(num1, num2), [n, m] = nums;
@@ -59,7 +59,7 @@ export const _num = Definition.createType("num", {
     zoomOut: (...nums) => nums.map(num => num / nums.zoom),
     diffusion: (num, min, max, diffusion) => {
         const d = num * diffusion;
-        return _num.rand(Math.max(min, num - d), Math.min(max, num + d));
+        return _num.rnd(Math.max(min, num - d), Math.min(max, num + d));
     },
     snap: (num, step, min, max, ceil, frame = true) => {
         var v = num, s = step, n = min, m = max, ni = (n != null), mi = (m != null), c = ceil;

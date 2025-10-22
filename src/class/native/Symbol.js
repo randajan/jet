@@ -6,7 +6,7 @@ export const _sym = _str.extend("sym", {
     create: Symbol,
     isFilled:_=>true,
     copy: x => Symbol(symToStr(x)),
-    rand: (...a) => Symbol(_str.rand(...a)),
-    from:symToStr,
-    to:str=>Symbol(str)
+    rnd: (...a) => Symbol(_str.rnd(...a)),
+    toParent:symToStr,
+    fromParent:str=>Symbol(str)
 });

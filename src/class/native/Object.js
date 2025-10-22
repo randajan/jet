@@ -1,4 +1,3 @@
-import { anyToFn } from "@randajan/function-parser";
 import { Definition } from "../self/Definition";
 import { errToObj, strToObj, symToStr } from "../../defs/convert";
 
@@ -22,14 +21,14 @@ export const _obj = Definition.createType("obj", {
     //fn,
     //num,
     //obj,
-    str:strToObj,
+    //str,
     //bol,
     //dt,
     err:errToObj,
-    map:v=>Object.fromEntries(v.entries()),
+    //map,
     //rgx,
     //set,
-    sym:v=>strToObj(symToStr(v))
+    //sym
 }).addTools({
     filter,
     exclude: (obj, mask = []) => filter(obj, (v, k) => !mask.includes(k)),

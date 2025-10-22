@@ -1,18 +1,16 @@
-import { anyToFn } from "@randajan/function-parser";
+import { fnToStr } from "@randajan/function-parser";
 import { Definition } from "../self/Definition";
 import { bolRnd } from "../../defs/crypt";
-import { _getRand } from "../../extra/rand";
+import { _getRnd } from "../../extra/rnd";
 import { _num } from "./Number";
-import { rgxLib } from "../../defs/regex";
+import { arrToStr, symToStr } from "../../defs/convert";
 
-
-const boolPats = /^(0*|f|(no?t?)|off|false|undefined|null|NaN)$/i;
 
 const hidePats = {
     point: "•", cross: "×", flake: "☀", draft: "⌭", power: "⚡", star: "★", skull: "☠", card: "♠♥♦♣", notes: "♩♪♫♬♭♮♯", chess: "♔♕♖♗♘♙♚♛♜♝♞♟",
     block: "▖▗▘▙▚▛▜▝▞▟", bar: "│║ ▌▐█", iting: "☰☱☲☳☴☵☶☷", astro: "♈♉♊♋♌♍♎♏♐♑♒♓", die: "⚀⚁⚂⚃⚄⚅",
     runic: "ᚠᚡᚢᚣᚤᚥᚦᚧᚨᚩᚪᚫᚬᚭᚮᚯᚰᚱᚳᚴᚵᚶᚷᚸᚹᚺᚻᚼᚽᚾᚿᛀᛁᛂᛃᛄᛅᛆᛇᛈᛉᛊᛋᛏᛐᛑᛒᛓᛔᛕᛖᛗᛘᛙᛚᛛᛜᛝᛞᛟᛠᛡᛢᛣᛤᛥᛦᛨᛩᛪᛮᛯᛰ",
-    dots: "⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿"
+    dots: "⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿"
 }
 
 const deloneMap = {
@@ -39,41 +37,26 @@ export const _str = Definition.createType("str", {
     isFilled: x=>!!x,
     create: any => any == null ? "" : String(any),
     copy: str => str,
-    rand: (min, max, sqr) => { //HOW TO GENERATE GREAT RANDOM STRING???
+    rnd: (min, max, sqr) => { //HOW TO GENERATE GREAT RANDOM STRING???
         const c = ["bcdfghjklmnpqrstvwxz", "aeiouy"], p = c[0].length / (c[0].length + c[1].length);
-        const l = _num.rand(Math.max(min, 2), max, sqr);
+        const l = _num.rnd(Math.max(min, 2), max, sqr);
         let s = bolRnd(p), r = "";
-        while (r.length < l) { r += _getRand(c[+(s = !s)]); }
+        while (r.length < l) { r += _getRnd(c[+(s = !s)]); }
         return r;
-    },
-}).defineTo({
-    arr: (str, comma) => comma == null ? [str] : str.split(comma), 
-    bol: str => !boolPats.test(str.trim()),
-    num: str =>(str, strict) => {
-        if (!str) { return 0; } else if (strict) { return Number(str); }
-        const match = String(str).replace(/\u00A0/g, ' ').match(rgxLib.number);
-        if (!match || !match[0]) { return 0; }
-        return Number(match[0].replaceAll(" ", "").replace(",", ".")) || 0;
-    },
-    fn: anyToFn,
-    obj: str =>{
-        const obj = JSON.parse(str);
-        if (typeof obj !== "object") { throw Error(`"${str}" is not valid JSON object`); }
-        return obj;
-    },
+    }
 }).defineFrom({
-    //arr:, //str: (arr, comma) => arr.join(comma ?? ""),
-    //bol:, //str: bol => String(bol)
-    //dt:, //    str: dt => dt.toLocaleString(),
-    //err:,
-    //fn:, //str:fnToStr,
-    //map:,
-    //num:, //num => String(num),
-    //obj:, //obj => JSON.stringify(obj),
-    //rgx:,
-    //set:,
-    //str:,
-    //sym:
+    arr:arrToStr,
+    bol:bol=>String(bol),
+    dt:dt=>dt.toLocaleString(),
+    //err,
+    fn:fn=>fnToStr(fn),
+    //map,
+    num:num=>String(num),
+    //obj,
+    //rgx,
+    //set,
+    //str,
+    sym:symToStr
 }).addTools({
     isNumeric: str => !isNaN(Number(str)),
     capitalize: str => str.charAt(0).toUpperCase() + str.slice(1),
@@ -99,16 +82,17 @@ export const _str = Definition.createType("str", {
     },
     hide: (str, pat, whitespace) => {
         if (!str) { return str; } var r = "", s = str, p = hidePats[pat] || pat || "•", w = (whitespace === false);
-        for (var i = 0; i < str.length; i++) { r += (w && (s[i] === "\n" || s[i] === " ")) ? s[i] : p.length - 1 ? _getRand(p) : p; }
+        for (var i = 0; i < str.length; i++) { r += (w && (s[i] === "\n" || s[i] === " ")) ? s[i] : p.length - 1 ? _getRnd(p) : p; }
         return r;
     },
+    hidePatterns:hidePats,
     bite: (str, separator) => {
         const x = str.indexOf(separator);
         return x <= 0 ? ["", str] : [str.slice(0, x), str.slice(x + separator.length)];
     },
     uid:(length = 12, pattern = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890") => {
         let r = ""; pattern = _str.to(pattern) || "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        while (r.length < length) { r += _getRand(pattern); }
+        while (r.length < length) { r += _getRnd(pattern); }
         return r;
     },
     levenshtein: (s0, s1, blend) => {
@@ -127,7 +111,7 @@ export const _str = Definition.createType("str", {
     },
     mutate: (str, factor) => {
         var r = [], n = str.length / 2, m = str.length * 2, f = Math.abs(1000 * (factor || 1));
-        while (r.length < f) { var s = _str.rand(n, m); r.push([s, _str.levenshtein(s, str)]); }
+        while (r.length < f) { var s = _str.rnd(n, m); r.push([s, _str.levenshtein(s, str)]); }
         return r.sort((a, b) => b[1] - a[1])[0][0];
     }
 })

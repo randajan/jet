@@ -1,5 +1,5 @@
 import { solids } from "../../defs/solid";
-import { isFilled } from "../../defs/statics";
+import { fail, isFilled, resetConvPaths } from "../../defs/statics";
 import { FnProxy } from "./FnProxy";
 
 
@@ -16,24 +16,25 @@ export class NoType extends FnProxy {
             name,
             isIterable,
             create:this.create.bind(def),
-            rand:this.rand.bind(def),
+            rnd:this.rnd.bind(def),
             is:this.is.bind(def),
             to:this.to.bind(def),
+            toDbg:this.toDbg.bind(def),
             copy:this.copy.bind(def),
             isFilled:this.isFilled.bind(def),
             isBlank:this.isBlank.bind(def),
             orNull:this.orNull.bind(def),
-            defineTo:this.defineTo.bind(def),
             defineFrom:this.defineFrom.bind(def),
             extend:this.extend.bind(def)
         });
     }
 
     create() {}
-    rand() {}
+    rnd() {}
 
     is(any) { return false; }
     to(any, ...args) {  }
+    toDbg(any) {}
     orNull(any, ...args) {}
 
     copy(any) { fail("unknown type copy failed"); }
@@ -42,29 +43,18 @@ export class NoType extends FnProxy {
 
     isBlank(any) { return !isFilled(any); }
 
-    defineTo(to, exe) { //rebinded def
-        const tt = typeof to;
-        if (tt === "function") { this.to.set("*", to); }
-        else if (Array.isArray(to)) { for (let i in to) { this.to.set(to[i], exe); } }
-        else if (tt === "object") { for (let i in to) { this.to.set(i, to[i]); } }
-        else { this.to.set(to, exe); }
-
-        return this.type;
-    }
-
     defineFrom(from, exe) {
         const tf = typeof from;
-        if (tf === "function") { this.from.set("*", from); }
-        else if (Array.isArray(to)) { for (let f of from) { this.from.set(f, exe); } }
+        if (Array.isArray(from)) { for (let f of from) { this.from.set(f, exe); } }
         else if (tf === "object") { for (let i in from) { this.from.set(i, from[i]); } }
-        else { this.from.set(from, exe); }
-
+        else if (tt === "string") { this.from.set(i, exe); }
+        else { fail(`from must be typeof string, array or object`, this.name); }
+        resetConvPaths();
         return this.type;
     }
 
     addTools(tools={}) {
-        const { name } = this;
-        if (typeof tools !== "object") { fail(`tools must be typeof object`, name); }
+        if (typeof tools !== "object") { fail(`tools must be typeof object`, this.name); }
         solids(this, tools);
         return this;
     }
