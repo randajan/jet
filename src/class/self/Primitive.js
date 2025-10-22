@@ -50,7 +50,7 @@ export class Primitive extends NoType {
     }
     
     orNull(any, opt={}) { //rebinded def
-        if (any != null) { return this.type.to(any, opt); }
+        return any == null ? null : this.type.to(any, opt);
     }
 
     copy(any) { //rebinded def

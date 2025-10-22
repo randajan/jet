@@ -1,309 +1,166 @@
 # @randajan/jet
 
-[![NPM](https://img.shields.io/npm/v/@randajan/jet.svg)](https://www.npmjs.com/package/@randajan/jet) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+`@randajan/jet` is a unified runtime type and conversion toolkit for JavaScript.  
+It extends native types with consistent behavior, powerful utilities, and an ecosystem of automatic conversions.
 
-Goal is to create ecosystem for javascript types with possibility to define custom types. This package provide easy and deep objects map and comparing, generic creating, filtering by types, content & other stuff
+Supports **ESM and CJS**, works the same in both Node.js and browsers.  
+Default build includes asynchronous types (such as `Promise`), while the synchronous-only version is available as:
 
-## Install
-
-```bash
-npm install @randajan/jet
+```
+@randajan/jet/sync
 ```
 
-or
+---
 
-```bash
-yarn add @randajan/jet
+## ⚙️ Jet Ecosystem
+
+The global `jet` object acts as a live registry of types, accessible via proxy:
+
+```js
+import { jet } from "@randajan/jet";
+
+jet.str.to(123); // "123"
+jet.num.to("42"); // 42
 ```
 
+Each type exposes a unified interface:
 
-## Main methods
-_These methods, are exclusive for default jet export_
+| Method | Description |
+|---------|--------------|
+| `to(any, [options])` | Converts a value to the current type |
+| `is(any)` | Checks if a value is of this type |
+| `isFilled(any)` | Checks if value is non-empty |
+| `copy(any)` | Creates a copy |
+| `rnd(...)` | Generates a random value |
+| `create(...)` | Creates a new instance |
 
-### __jet(any, strict=true)__
-_will return jet type name of variable any_
+Types can define custom conversions via `defineFrom(fromType, converter)` and may inherit from parent types.
 
-* Arguments
-  * any: _any variable_
-  * strict: _boolean (true = return closest type)_
-* Return
-  * all=false: _top type of variable_
-  * all=true: _array with all types of variable_
-* Example
-  * jet.type([]) === "Array";
-  * jet(new (class {})(), true) === undefined;
-  * jet(new (class {})(), false) === "Object";
+---
 
-### __jet.define(name, constructor, options={})__
-_Defining custom types for detecting, creating and copying_
-_Same jet methods will be attached to jet.*[name](), to constructor.jet.*() and to prototype.jet.*()_
+## 🔄 Type Conversions
 
-* Arguments
-  * name: _string (name of the type)_
-  * constructor: _class_
-  * options: _object_
-    * create: _function (creating new instance)_
-    * is: _function (verify type of variable)_
-    * full: _function (check if variable is full)_
-    * copy: _function (perform copy)_
-    * rnd: _function (create with random content)_
-    * keys: _function (array of keys for mapable types)_
-    * vals: _function (array of values for mapable types)_
-    * pairs: _function (array of entries for mapable types)_
-    * get: _function (get key for mapable types)_
-    * set: _function (set key for mapable types)_
-    * rem: _function (rem key for mapable types)_
-    * extend: _boolean (false=turn off extension of constructor and prototype)
-    * extendConstructor: _boolean or object (false=turn off extension of constructor)
-    * extendPrototype: _boolean or object (false=turn off extension of prototype)
-* Return
-  * _constructor_
-* Example
-  * jet.type.define("Array", Array, { create:x=>new Array(x), copy:x=>Array.from(x) } );
-  * jet.type.define("Element", Element, { extendConstructor:{ find:query=>document.querySelector(query) } });
+Conversions between types are automatic, directional, and follow inheritance chains.
 
-### __jet.isMapable(any, strict=true)__
-_Return true on any type of variable that has mapable=true on its type definition_
+```js
+jet.num.to("123"); // 123
+jet.str.to([1, 2, 3], { glue: "," }); // "1,2,3"
+```
 
-* Arguments
-  * any: _any variable_
-  * strict: _boolean (true = is closest type mapable)_
-* Return
-  * _true when variable is mapable_
-* Example
-  * jet.isMapable([]) === true
-  * jet.isMapable({}) === true;
-  * jet.isMapable("foo") === false;
+Use `.toDbg(any)` to inspect conversion paths.
 
-### __jet.isRunnable(any)__
-_Return true if any typeof === function_
+Each conversion can have additional parameters (e.g. `{ glue }` for arrays → strings).
 
-* Arguments
-  * any: _any variable_
-* Return
-  * _true when variable is runnable_
-* Example
-  * jet.isRunnable([]) === false
-  * jet.isRunnable({}) === false;
-  * jet.isRunnable(()=>{}) === true;
+---
 
-## Constructor/Prototype methods
-_These methods acumulate main funcstionality._
-_After 'jet.define(**name**, **consturctor**)' is called, those methods are attached to 3 different endpoints._
+## 🧩 Types
 
- 1. Global dynamic: _jet.**method**(**name**, ...args)_
- 2. Global static: __jet.**method**.**name**(...args)_
- 3. Constructor: _**constructor**.jet.**method**(...args)_
+### `str` — String
+String type with extended manipulation tools.
 
-### __jet.is(name, any, strict=true)__
-_Check the passed type with result. Endpoint 'jet.is(name, ...a)' also work like typeof and instanceof_
+- Tools: `capitalize`, `camelCase`, `pascalCase`, `snakeCase`, `delone`, `simplify`, `uid`, `fight`, `levenshtein`, `mutate`, etc.
+- Extra: predefined unicode patterns via `hidePatterns`.
 
-* Arguments
-  * name: _string (name of the type)_
-  * any: _any variable_
-  * strict: _boolean (true = is instanceof)_
-* Example
-  * jet.is.Array([]) === true;
-  * jet.is.Object([]) === false;
-  * jet.is.Object([], true) === true;
-  * jet.is.RegExp(RegExp()) === true;
+### `num` — Number
+Number utilities with precision and random helpers.
 
-### __jet.isFull(any)__
-_Catching empty mapable objects and NaN_
+- Tools: `x`, `frame`, `round`, `snap`, `zoomIn`, `zoomOut`, `diffusion`, `toHex`, `toLetter`.
 
-* Arguments
-  * any: _any variable_
-* Return
-  * _true when variable is full_
-* Example
-  * jet.isFull([]) === false;
-  * jet.isFull({foo:bar}) === true;
+### `bol` — Boolean
+Boolean type. Always filled. Supports random ratio generation.
 
-### __jet.create(name, ...args)__
-_Will create instance requested constructor (use without "new")_
+### `dt` — Date
+Date type with random range generation and automatic parsing from strings/numbers.
 
-* Arguments
-  * name: _string (name of the type)_
-  * ...args: _will be passed to the creating function_
-* Return
-  * _new instance_
-* Example
-  * jet.create.Array("foo", "bar") == ["foo", "bar"];
-  * jet.create.Object() == {};
+### `arr` — Array
+Iterable array type.
 
-### __jet.rnd(name, ...args)__
-_Will create instance with random value_
+- Tools: `wrap`, `shuffle`, `compare`, `sliceMap`, `clean`.
+- Converts from strings via `split` and optional `{ glue }`.
 
-* Arguments
-  * name: _string (name of the type)_
-  * ...args: _will be passed to the defined rnd method_
-* Return
-  * _new instance with random value_
+### `obj` — Object
+Iterable key-value object.
 
-### __jet.full(...any) / .only(name, ...any) / .tap(name, ...any) / .pull(name, ...any)__
-_Used for selecting, filtering, creating or copying variables_
+- Tools: `filter`, `exclude`, `extract`.
+- Converts from `Error` objects automatically.
 
-* Arguments
-  * name: _string (name of the type)_
-  * ...any: _any variables (will be tested in order until the type will match)_
-* Return
-  * only: _undefined when there is no match_
-  * full: _same as only but variable must be full_
-  * tap: _same as only but try to create the type when there is no match_
-  * pull: _same as tap but try to copy variable if there is match_
-* Example
-  * jet.only.Sring(1, "foo", [], ["bar"], {foo:"bar"}) == "foo";
-  * jet.tap.Array(1, "foo", [], ["bar"], {foo:"bar"}) == [];
-  * jet.full.Array(1, "foo", [], ["bar"], {foo:"bar"}) == ["bar"];
-  * jet.only.RegExp(1, "foo", [], ["bar"], {foo:"bar"}) == null;
-  * jet.tap.RegExp(1, "foo", [], ["bar"], {foo:"bar"}) == RegExp();
-  * jet.pull.Object(1, "foo", [], ["bar"], {foo:"bar"}) == {foo:"bar"}
+### `map` — Map
+Extends `obj`, providing two-way conversion between `obj` and `map`.
 
-### __jet.vals(any) / .keys(any) / .pairs(any) / .get(any, key) / .set(any, key, val) / .rem(any, key)__
-_Handle mapable objects (it requires defined type)_
+### `set` — Set
+Extends `arr`, providing two-way conversion between `arr` and `set`.
 
-* Arguments
-  * any: _any variable_ 
-  * key: _any variable (usually string or number)_
-  * val: _any variable (used just for for set function)_
-* Return
-  * result from perform operation against the defined type_
-* Example
-  * jet.vals({foo:"bar"}) === ["bar"];
-  * jet.keys({foo:"bar"}) === ["foo"];
-  * jet.entries({foo:"bar"}) === [["foo"], ["bar"]];
-  * jet.get({foo:"bar"}, "foo") === "bar";
+### `rgx` — RegExp
+Regular expression type with conversions to/from strings.
 
-## Extra methods
+- Exposes `rgx.lib` — a library of predefined regex patterns (e.g. `number`, `email`, `ip`).
 
-### __jet.uid(length, pattern)__
-* Arguments
-  * length: _number (desired length)_
-  * pattern: _string (list of characters)_
-* Return
-  * _string (pseudo random)_
-* Example
-  * jet.uid(8, "a") === "aaaaaaaa"
+### `fn` — Function
+Function type. Can be converted from most types using `@randajan/function-parser`.
 
-### __jet.copy(any, deep=false, copyUnmapable=false)__
-_Will create copy of instance_
+- Tool: `benchmark(fces, inputs, iterations)` for performance testing.
 
-* Arguments
-  * any: _any variable_
-  * deep: _boolean (deep copy of mapable objects)_
-  * copyUnmapable: _boolean (copy even unmapable values in the deep nested structure)_
-* Return
-  * _new instance or the old if there wasn't defined copy function_
-* Example
-  * x = [{a:Symbol("test")}]; y = jet.copy(x);              console.log(x===y, x[0]===y[0], x[0].a===y[0].a) // false true  true
-  * x = [{a:Symbol("test")}]; y = jet.copy(x, true);        console.log(x===y, x[0]===y[0], x[0].a===y[0].a) // false false true
-  * x = [{a:Symbol("test")}]; y = jet.copy(x, true, true);  console.log(x===y, x[0]===y[0], x[0].a===y[0].a) // false false false
+### `prom` — Promise
+Promise type. Supports conversions from nearly all types.  
+Use the sync build (`@randajan/jet/sync`) if you need to exclude asynchronous behavior.
 
-### __jet.deflate(any, includeMapable=false)__
-_Will deflate nested structure to the flat object where indexes are whole original dot-separated paths_
+---
 
-* Arguments
-  * any: _any variable_
-  * includeMapable: _boolean_
-* Return
-  * includeMapable=false: _object (alle values exclude mapable values in original structure)_
-  * includeMapable=true: _object (all values include mapable values in original structure)_
-* Example
-  * jet.deflate({a:{b:["c"]}}) === {"a.b.0": "c"}
-  * jet.deflate({a:{b:["c"]}}, true) === {"a.b.0": "c"}
-  * jet.deflate({a:["c"]}, true) === { "a":["c"], "a.0":"c", "":{"a":["c"]} }
+## 🔁 Iterable Types
 
-### __jet.compare(anyA, anyB, diffList=false)__
-_Will compare two variables include deep nested objects_
+Iterable types (`arr`, `set`, `map`, `obj`) share a unified API:
 
-* Arguments
-  * anyA: _any variable_
-  * anyB: _any variable_
-  * diffList: _boolean_
-* Return
-  * diffList=false: _boolean (false if the content is same)_
-  * diffList=true: _boolean (list of differencies)_
-* Example
-  * jet.compare({a:{b:["c"]}}, {a:{b:["c"]}}) === true
-  * jet.compare({a:{b:["c"]}}, {a:{b:["d"]}}) === false
-  * jet.compare({a:{b:["c"]}}, {a:{b:["d"]}}, true) === ["a.b.0"];
+| Method | Description |
+|---------|-------------|
+| `keys(any)` | Returns all keys |
+| `values(any)` | Returns all values |
+| `entries(any)` | Returns `[key, value]` pairs |
+| `get(any, key)` | Safely get a value |
+| `set(any, key, value)` | Safely set a value |
+| `del(any, key)` | Delete an entry |
 
-### __jet.melt(any, comma)__
-_Will join any values even values of deep nested structure_
+These ensure that all iterable types can be traversed and mutated using the same syntax, regardless of structure.
 
-* Arguments
-  * any: _any variable_
-  * comma: _string ()_
-* Return
-  * _string (comma separated values)_
-* Example
-  * jet.melt({a:["b", "c"], d:"e"}, ", ") === "b, c, e"
+---
 
-### __jet.dig(any, path, reductor)__
-_Exploring nested structure by path_
+## 🧠 Global Tools
 
-* Arguments
-  * any: _any mapable variable_ 
-  * path: _string or Array (even nested Array)_
-  * reductor: _function(next, parent, dir+key, dir, key, isEnd)_
-* Return
-  * result of first iteration of reductor
+The following utilities are exported globally for working with types and data.
 
-### __jet.digIn(any, path, val, force=true, reductor)__
-_Return value from deep nested object_
+| Function | Description | Arguments | Returns |
+|-----------|-------------|------------|----------|
+| `isFilled(any)` | Checks if a value is not empty | `any` | `boolean` |
+| `isBlank(any)` | Opposite of `isFilled` | `any` | `boolean` |
+| `isIterable(any)` | Checks if a type is iterable | `any` | `boolean` |
+| `isRunnable(any)` | Checks if value is callable | `any` | `boolean` |
+| `get(any, key)` | Safe getter for iterable types | `(any, key)` | `any` |
+| `set(any, key, value)` | Safe setter | `(any, key, value)` | `any` |
+| `del(any, key)` | Safe delete operation | `(any, key)` | `void` |
+| `keys(any)` | Returns keys | `(any)` | `array` |
+| `values(any)` | Returns values | `(any)` | `array` |
+| `entries(any)` | Returns entries | `(any)` | `array` |
+| `copy(any)` | Creates a deep copy | `(any)` | `any` |
+| `filled(...args)` | Returns first non-empty value | `(...args)` | `any` |
+| `getRnd(any, [min,max,sqr])` | Random element from iterable |  | `any` |
+| `melt(any, comma, trait)` | Recursively concatenates values |  | `string` |
+| `run(any, ...args)` | Runs function(s) or iterable of functions |  | `void` |
+| `jsonFrom(any)` | Safe JSON.parse wrapper |  | `object` |
+| `jsonTo(any, pretty)` | Safe JSON.stringify wrapper |  | `string` |
+| `createEnum(enums, opt)` | Creates a safe enum getter | `(array, {before, after, def})` | `function` |
 
-* Arguments
-  * any: _any mapable variable_ 
-  * path: _string or Array (even nested Array)_
-  * val: _any_
-  * force: _boolean (create path if not exist)_
-  * reductor: _function(next, parent, dir+key, dir, key, isEnd)_
-* Return
-  * any
-* Example
-  * jet.digIn({}, "foo.0", "bar", true) == {foo:["bar"]};
+---
 
-### __jet.digOut(any, path, def)__
-_Return  value from deep nested object_
+### Example: `createEnum`
 
-* Arguments
-  * any: _any mapable variable_ 
-  * path: _string or Array (even nested Array)_
-  * def: _any_
-* Return
-  * find value or def when no value was found
-* Example
-  * jet.digOut({foo:["bar"]}, "foo.0") == "bar";
-  * jet.digOut({foo:["bar"]}, ["foo", 1], "foo") == "foo";
+```js
+const color = createEnum(["red", "green", "blue"], { def: "red" });
 
-### __jet.run(any, ...args)__
-_Will run every function that will discover_
+color("green"); // "green"
+color("yellow"); // "red" (default)
+```
 
-* Arguments
-  * any: _any (function || array/object with functions_
-  * ...args: _arguments will be passed to every call_
-* Return
-  * any=function: _result of function_
-  * any=array/object: _array of all results_
-* Example
-  * jet.run(_=>console.log("foo")) _console: "foo"_
+---
 
+## 📜 License
 
-### __jet.forEach(any, fce, deep, dir) / .map(any, fce, deep, dir)__
-_Map any mapable object by default: Object, Array, Set, Map, Pool_
-
-* Arguments
-  * any: _any mapable variable_ 
-  * fce: _function(val, dir+key, dir, key) (handler)_
-  * deep: _boolean or function (true=recursive maping; function=custom recursive maping)_
-  * dir: _string (base dir of structure)_
-* Return
-  * forEach: _flat array with result from handler function_
-  * map: _copy of structure with result from handler function_
-* Example
-  * jet.forEach({foo:"bar"}, _=>_) == ["bar"];
-  * jet.map({foo:"bar"}, _=>_) == {foo:"bar"};
-
-## License
-
-MIT © [randajan](https://github.com/randajan)
+MIT © randajan
