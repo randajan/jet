@@ -1,6 +1,7 @@
 import { bolRnd } from "../../defs/crypt";
 import { Definition } from "../self/Definition";
-import { strToBol } from "../../defs/convert";
+
+const boolPats = /^(y(es|eah)?|t(rue)?|on|ok(ay)?|enable(d)?|(allow|accept)(ed)?|active|\d*[1-9]+\d*([,.]\d+)?|\d*[,.]\d*[1-9]+\d*)$/i
 
 
 export const _bol = Definition.createType("bol", {
@@ -19,6 +20,8 @@ export const _bol = Definition.createType("bol", {
     obj:v=>true,
     rgx:v=>true,
     set:v=>true,
-    str:strToBol
+    str:str=>_bol.strPattern.test(str.trim())
+}).addTools({
+    strPattern:boolPats
 })
 

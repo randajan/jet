@@ -18,12 +18,13 @@ export class NoType extends FnProxy {
             create:this.create.bind(def),
             rnd:this.rnd.bind(def),
             is:this.is.bind(def),
+            convert:this.convert.bind(def),
+            convertDbg:this.convertDbg.bind(def),
             to:this.to.bind(def),
-            toDbg:this.toDbg.bind(def),
+            tor:this.tor.bind(def),
             copy:this.copy.bind(def),
             isFilled:this.isFilled.bind(def),
             isBlank:this.isBlank.bind(def),
-            orNull:this.orNull.bind(def),
             defineFrom:this.defineFrom.bind(def),
             extend:this.extend.bind(def)
         });
@@ -33,9 +34,12 @@ export class NoType extends FnProxy {
     rnd() {}
 
     is(any) { return false; }
+
+    convert() {}
+    convertDbg(any) {}
+
     to(any, ...args) {  }
-    toDbg(any) {}
-    orNull(any, ...args) {}
+    tor(any, ...args) {}
 
     copy(any) { fail("unknown type copy failed"); }
 

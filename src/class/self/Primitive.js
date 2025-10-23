@@ -33,7 +33,7 @@ export class Primitive extends NoType {
         return is(any) && !isFilled(any);
     }
     
-    to(any, opt={}) { //rebinded def
+    convert(any, opt={}) { //rebinded def
         const dTo = this;
         const dFrom = getDefByInst(any, false);
         const convPath = findConvPath(dFrom, dTo);
@@ -42,15 +42,19 @@ export class Primitive extends NoType {
         catch(err) { fail(`conversion to '${dTo.name}' failed`, dFrom.name, err); }
     }
 
-    toDbg(any) {
+    convertDbg(any) {
         const dTo = this;
         const dFrom = getDefByInst(any, false);
         const convPath = findConvPath(dFrom, dTo);
         return convPath.map(p=>({...p}));
     }
-    
-    orNull(any, opt={}) { //rebinded def
-        return any == null ? null : this.type.to(any, opt);
+
+    to(any, opt={}) {
+        return any == null ? any : this.type.convert(any, opt);
+    }
+
+    tor(any, opt={}) { //rebinded def
+        return any == null ? this.type.create() : this.type.convert(any, opt);
     }
 
     copy(any) { //rebinded def

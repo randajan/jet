@@ -28,10 +28,6 @@ export const errToObj = err => {
 }
 
 
-
-const boolPats = /^(0*|f|no?t?|none|off|false|undefined|null|NaN)$/i;
-export const strToBol = str => !boolPats.test(str.trim());
-
 export const numToDt = num => {
     const dt = new Date();
     dt.setTime(num);

@@ -27,7 +27,8 @@ Each type exposes a unified interface:
 
 | Method | Description |
 |---------|--------------|
-| `to(any, [options])` | Converts a value to the current type |
+| `to(any, [options])` | Converts a value to the current type but `null` or `undefined` will pass |
+| `tor(any, [options])` | Converts a value to the current type but on pasing `null` or `undefined` will be created new instance |
 | `is(any)` | Checks if a value is of this type |
 | `isFilled(any)` | Checks if value is non-empty |
 | `copy(any)` | Creates a copy |
