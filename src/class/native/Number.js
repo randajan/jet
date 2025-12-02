@@ -3,6 +3,7 @@ import { numRnd } from "../../defs/crypt";
 import { _str } from "./String";
 import { Definition } from "../self/Definition";
 import { strToNum, symToStr } from "../../defs/convert";
+import { numFormat } from "../../defs/numFormat";
 
 
 
@@ -17,6 +18,7 @@ export const _num = Definition.createType("num", {
         if (sqr) { r = Math.pow(r, sqr < 0 ? -sqr : 1 / sqr); }
         return _num.fromRatio(r, min || 0, max || min || 1);
     },
+    format:numFormat
 }).defineFrom({
     //arr,
     //fn,

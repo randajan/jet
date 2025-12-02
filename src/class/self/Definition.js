@@ -13,7 +13,7 @@ export class Definition {
     constructor(name, opt={}, parent=null) {
         if (getDefByName(name)) { fail("is allready defined", name); }
 
-        const { self, create, rnd, is, isFilled, copy, keys, values, entries, fromParent, toParent } = opt;
+        const { self, create, rnd, is, isFilled, copy, keys, values, entries, fromParent, toParent, format } = opt;
 
         if (!self) { fail("opt.self (constructor) missing", name); }
         if (parent && (!toParent || !fromParent)) { fail("opt.fromParent or opt.toParent missing", name); }

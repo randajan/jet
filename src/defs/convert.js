@@ -1,13 +1,13 @@
+import { numFormat } from "./numFormat";
 import { rgxLib } from "./regex";
 
 
-
-export const strToNum = str => {
+export const strToNum = (str, opt={}) => {
     if (!str) { return; }
     const match = str.replace(/\u00A0/g, ' ').match(rgxLib.number);
     if (!match || !match[0]) { return; }
     const n = Number(match[0].replaceAll(" ", "").replace(",", "."));
-    if (!isNaN(n)) { return n; }
+    if (!isNaN(n)) { return numFormat(n, opt); }
 }
 
 
